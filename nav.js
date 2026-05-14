@@ -3,15 +3,15 @@ const canvas = document.getElementById('canvas');
 export default class Nav {
     static Azimuth = 0;
     static Elevation = 0;
-    static #FORWARD = [0, 0, -1];
-    static #RIGHT = [1, 0, 0];
-    //static #UP = [0, 1, 0];
-    static get Lookat() {
-        const heading = Util.rotateY(Nav.#FORWARD, Nav.Azimuth);
-        const axis = Util.rotateY(Nav.#RIGHT, Nav.Azimuth);
-        const lookat = Util.rotate(heading, axis, Nav.Elevation);
-        return lookat;
-    }
+    // static #FORWARD = [0, 0, -1];
+    // static #RIGHT = [1, 0, 0];
+    // //static #UP = [0, 1, 0];
+    // static get Lookat() {
+    //     const heading = Util.rotateY(Nav.#FORWARD, Nav.Azimuth);
+    //     const axis = Util.rotateY(Nav.#RIGHT, Nav.Azimuth);
+    //     const lookat = Util.rotate(heading, axis, Nav.Elevation);
+    //     return lookat;
+    // }
     static get Direction() {
         const cosEl = Math.cos(Nav.Elevation);
         return [
