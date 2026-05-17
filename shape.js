@@ -13,7 +13,7 @@ export default class Shape {
         this.matWorld = mat4.create();
         this.scaleVec = vec3.create();
         this.rotation = quat.create();
-        this.rotationSpeed = glMatrix.toRadian(Math.PI * 10) * Math.random() * 5; // radians per second
+        this.rotationSpeed = 1;//glMatrix.toRadian(Math.PI * 10) * Math.random() * 5; // radians per second
     }
     update() {
         this.rotationAngle += this.rotationSpeed * Process.DT;

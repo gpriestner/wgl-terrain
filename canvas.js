@@ -5,6 +5,7 @@ function resize() {
     canvas.height = window.innerHeight;
     canvas.aspect = canvas.width / canvas.height;
     view.viewport(0, 0, canvas.width, canvas.height);
+    if (canvas.cameras) for (const c of canvas.cameras) c.aspect = canvas.aspect;
 }
 resize();
 window.addEventListener('resize', resize);

@@ -1,5 +1,26 @@
 import { vertex, fragment } from "./shaders.js";
+import { Terrain } from "./terrain.js";
 const X = 0, Y = 1, Z = 2;
+
+class Color {
+    static Red = [1, 0, 0];
+    static Lime = [0, 1, 0];
+    static Green = [0, 0.5, 0];
+    static Blue = [0, 0, 1];
+    static Yellow = [1, 1, 0];
+    static Aqua = [0, 1, 1];
+    static Magenta = [1, 0, 1];
+    static White = [1, 1, 1];
+    static Gray = [0.5, 0.5, 0.5];
+    static Black = [0, 0, 0];
+    static LightGray = [0.8, 0.8, 0.8];
+    static DarkGray = [0.2, 0.2, 0.2];
+    static Purple = [0.5, 0, 0.5];
+    static Maroon = [0.5, 0, 0];
+    static Olive = [0.5, 0.5, 0];
+    static Navy = [0, 0, 0.5];
+    static get Random() { return [Math.random(), Math.random(), Math.random()]; }
+}
 
 export default class Util {
     static createBuffer(view, data, type) {
@@ -28,21 +49,22 @@ export default class Util {
     }
     static getPlaneVertices(size = 20, divisions = 10, c1 = [0.1, 0.1, 0.1], c2 = [0.3, 0.3, 0.3]) {
         const vertices = [];
-        // const terrain = [];
+        const terrain = [];
         // const tp1 = new Terrain(-5, 7, -5, 8);
         // const tp2 = new Terrain(5, -5, -5, 5);
         // terrain.push(tp1);
         // terrain.push(tp2);
-        // const terrainCount = 500;
-        // for (let i = 0; i < terrainCount; i++) {
-        //     const x = random(-size, size);
-        //     let y = random(3, 10);
-        //     if (Math.random() < 0.5) y = -y;
-        //     const z = random(-size, size);
-        //     const r = random(3, 10);
-        //     const tp = new Terrain(x, y, z, r);
-        //     terrain.push(tp);
-        // }
+        const terrainCount = 5;
+        const limit = size * 0.9 / 2;
+        for (let i = 0; i < terrainCount; i++) {
+            const x = Util.random(-limit, limit);
+            const z = Util.random(-limit, limit);
+            let y = Util.random(3, 10);
+            if (Math.random() < 0.5) y = -y;
+            const r = Util.random(3, 10);
+            const tp = new Terrain(x, y, z, r);
+            terrain.push(tp);
+        }
 
         const step = size / divisions;
         const start = -size / 2;
@@ -67,12 +89,12 @@ export default class Util {
 
                 let swh = 0; let neh = 0; let nwh = 0; let seh = 0;
 
-                // for (const t of terrain) {
-                //     swh += t.height({ x: swx, z: swz });
-                //     neh += t.height({ x: nex, z: nez });
-                //     nwh += t.height({ x: nwx, z: nwz });
-                //     seh += t.height({ x: sex, z: sez });
-                // }
+                for (const t of terrain) {
+                    swh += t.height({ x: swx, z: swz });
+                    neh += t.height({ x: nex, z: nez });
+                    nwh += t.height({ x: nwx, z: nwz });
+                    seh += t.height({ x: sex, z: sez });
+                }
 
                 //Add four vertices for each square
                 vertices.push(
@@ -95,7 +117,7 @@ export default class Util {
     }
     static getPlaneIndices(divisions = 10) {
         const indices = [];
-        const pointsPerQuad = 4; // number of verticies pushed for each tile
+        const pointsPerQuad = 4; // number of vertices pushed for each tile
         const tiles = divisions * divisions; // assumes a square plane with equal divisions in x and z
         for (let t = 0; t < tiles; t++) {
             const i = t * pointsPerQuad;
@@ -107,6 +129,56 @@ export default class Util {
             indices.push(sw, se, ne); // allow different heights over terrain
         }
         return new Uint32Array(indices);
+    }
+    static getPyramidVertices() {
+        const model = [
+            [+0, +1, +0], // 0 - top vertex
+            [-1, -1, -1], // 1 - north west
+            [+1, -1, -1], // 2 - north east
+            [+1, -1, +1], // 3 - south east
+            [-1, -1, +1]  // 4 - south west
+        ];
+        const vertices = [];
+        // near face - navy
+        vertices.push(...model[0], ...Color.Navy); // 0 - top
+        vertices.push(...model[4], ...Color.Navy); // 2 - south west
+        vertices.push(...model[3], ...Color.Navy); // 1 - south east
+
+        // right face - maroon
+        vertices.push(...model[0], ...Color.Maroon); // 3 - top
+        vertices.push(...model[3], ...Color.Maroon); // 5 - south east
+        vertices.push(...model[2], ...Color.Maroon); // 4 - north east
+
+        // far face - olive
+        vertices.push(...model[0], ...Color.Olive); // 6 - top
+        vertices.push(...model[2], ...Color.Olive); // 8 - north east
+        vertices.push(...model[1], ...Color.Olive); // 7 - north west
+
+        // left face - purple
+        vertices.push(...model[0], ...Color.Purple); // 9 - top
+        vertices.push(...model[1], ...Color.Purple); // 11 - north west
+        vertices.push(...model[4], ...Color.Purple); // 10 - south west
+
+        // base - gray
+        vertices.push(...model[4], ...Color.Gray); // 12 - south west
+        vertices.push(...model[1], ...Color.Gray); // 14 - north west
+        vertices.push(...model[3], ...Color.Gray); // 13 - south east
+
+        vertices.push(...model[3], ...Color.Gray); // 15 - south east
+        vertices.push(...model[1], ...Color.Gray); // 17 - north west
+        vertices.push(...model[2], ...Color.Gray); // 16 - north east
+
+        return new Float32Array(vertices);
+    }
+    static getPyramidIndices() {
+        return new Uint32Array([
+            0, 1, 2,    // near face
+            3, 4, 5,    // right face
+            6, 7, 8,    // far face
+            9, 10, 11,   // left face
+            12, 13, 14,   // base triangle 1
+            15, 16, 17    // base triangle 2
+        ]);
     }
     static getVao(view, vertexBuffer, indexBuffer, posAttrib, colorAttrib) {
         const vao = view.createVertexArray();
@@ -167,7 +239,14 @@ export default class Util {
     static clamp(value, min, max) {
         return Math.max(min, Math.min(max, value));
     }
+    static random(min, max) {
+        return Math.random() * (max - min) + min;
+    }
     static toRadians(degrees) {
         return degrees * Math.PI / 180;
+    }
+    static unitVector(v) {
+        const length = Math.hypot(v[X], v[Y], v[Z]);
+        return length === 0 ? [0, 0, 0] : [v[X] / length, v[Y] / length, v[Z] / length];
     }
 }

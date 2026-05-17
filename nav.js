@@ -3,6 +3,8 @@ const canvas = document.getElementById('canvas');
 export default class Nav {
     static Azimuth = 0;
     static Elevation = 0;
+    static #minElevation = -Math.PI / 2 + 0.01;
+    static #maxElevation = Math.PI / 2 - 0.01;
     // static #FORWARD = [0, 0, -1];
     // static #RIGHT = [1, 0, 0];
     // //static #UP = [0, 1, 0];
@@ -38,6 +40,6 @@ export default class Nav {
         const turnSpeed = 0.001;
         Nav.Azimuth += e.movementX * turnSpeed;
         Nav.Elevation -= e.movementY * turnSpeed;
-        Nav.Elevation = Util.clamp(Nav.Elevation, -Math.PI / 2 + 0.01, Math.PI / 2 - 0.01);
+        Nav.Elevation = Util.clamp(Nav.Elevation, Nav.#minElevation, Nav.#maxElevation);
     }
 }

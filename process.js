@@ -1,3 +1,4 @@
+import Go from "./go.js";
 export default class Process {
     static DT = 0;
     static FPS = 0;
@@ -27,5 +28,27 @@ export default class Process {
     }
     static SetFrameLimit(limit) {
         Process.#frameLimit = 1000 / limit;
+    }
+    static Input(camera) {
+        const unitsPerSecond = 5;
+        const turnsPerSecond = 0.1;
+        let turnSpeed = turnsPerSecond * Math.PI * 2 * Process.DT;
+        let moveSpeed = unitsPerSecond * Process.DT;
+        let factor = 1;
+        if (Go.Shift) factor = 5;
+        if (Go.Ctrl) factor = 0.2;
+        turnSpeed *= factor;
+        moveSpeed *= factor;
+
+        if (Go.Forward) camera.forward(moveSpeed);
+        if (Go.Backward) camera.backward(moveSpeed);
+        if (Go.StrafeLeft) camera.strafeLeft(moveSpeed);
+        if (Go.StrafeRight) camera.strafeRight(moveSpeed);
+        if (Go.TurnLeft) camera.turn(-turnSpeed);
+        if (Go.TurnRight) camera.turn(turnSpeed);
+        if (Go.TiltUp) camera.tilt(turnSpeed);
+        if (Go.TiltDown) camera.tilt(-turnSpeed);
+        if (Go.Higher) camera.elevate(moveSpeed);
+        if (Go.Lower) camera.elevate(-moveSpeed);
     }
 }
