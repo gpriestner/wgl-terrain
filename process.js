@@ -1,4 +1,5 @@
 import Go from "./go.js";
+
 export default class Process {
     static DT = 0;
     static FPS = 0;

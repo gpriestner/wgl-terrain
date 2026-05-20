@@ -2,26 +2,6 @@ import { vertex, fragment } from "./shaders.js";
 import { Terrain } from "./terrain.js";
 const X = 0, Y = 1, Z = 2;
 
-class Color {
-    static Red = [1, 0, 0];
-    static Lime = [0, 1, 0];
-    static Green = [0, 0.5, 0];
-    static Blue = [0, 0, 1];
-    static Yellow = [1, 1, 0];
-    static Aqua = [0, 1, 1];
-    static Magenta = [1, 0, 1];
-    static White = [1, 1, 1];
-    static Gray = [0.5, 0.5, 0.5];
-    static Black = [0, 0, 0];
-    static LightGray = [0.8, 0.8, 0.8];
-    static DarkGray = [0.2, 0.2, 0.2];
-    static Purple = [0.5, 0, 0.5];
-    static Maroon = [0.5, 0, 0];
-    static Olive = [0.5, 0.5, 0];
-    static Navy = [0, 0, 0.5];
-    static get Random() { return [Math.random(), Math.random(), Math.random()]; }
-}
-
 export default class Util {
     static createBuffer(view, data, type) {
         console.assert(type === view.ARRAY_BUFFER || type === view.ELEMENT_ARRAY_BUFFER, "Invalid buffer type");
@@ -140,33 +120,38 @@ export default class Util {
         ];
         const vertices = [];
         // near face - navy
-        vertices.push(...model[0], ...Color.Navy); // 0 - top
-        vertices.push(...model[4], ...Color.Navy); // 2 - south west
-        vertices.push(...model[3], ...Color.Navy); // 1 - south east
+        const nearColor = Util.toRGB("Navy");
+        vertices.push(...model[0], ...nearColor); // 0 - top
+        vertices.push(...model[4], ...nearColor); // 2 - south west
+        vertices.push(...model[3], ...nearColor); // 1 - south east
 
         // right face - maroon
-        vertices.push(...model[0], ...Color.Maroon); // 3 - top
-        vertices.push(...model[3], ...Color.Maroon); // 5 - south east
-        vertices.push(...model[2], ...Color.Maroon); // 4 - north east
+        const rightColor = Util.toRGB("Maroon");
+        vertices.push(...model[0], ...rightColor); // 3 - top
+        vertices.push(...model[3], ...rightColor); // 5 - south east
+        vertices.push(...model[2], ...rightColor); // 4 - north east
 
         // far face - olive
-        vertices.push(...model[0], ...Color.Olive); // 6 - top
-        vertices.push(...model[2], ...Color.Olive); // 8 - north east
-        vertices.push(...model[1], ...Color.Olive); // 7 - north west
+        const farColor = Util.toRGB("Olive");
+        vertices.push(...model[0], ...farColor); // 6 - top
+        vertices.push(...model[2], ...farColor); // 8 - north east
+        vertices.push(...model[1], ...farColor); // 7 - north west
 
         // left face - purple
-        vertices.push(...model[0], ...Color.Purple); // 9 - top
-        vertices.push(...model[1], ...Color.Purple); // 11 - north west
-        vertices.push(...model[4], ...Color.Purple); // 10 - south west
+        const leftColor = Util.toRGB("Purple");
+        vertices.push(...model[0], ...leftColor); // 9 - top
+        vertices.push(...model[1], ...leftColor); // 11 - north west
+        vertices.push(...model[4], ...leftColor); // 10 - south west
 
-        // base - gray
-        vertices.push(...model[4], ...Color.Gray); // 12 - south west
-        vertices.push(...model[1], ...Color.Gray); // 14 - north west
-        vertices.push(...model[3], ...Color.Gray); // 13 - south east
+        // base - dodger blue
+        const baseColor = Util.toRGB("DodgerBlue");
+        vertices.push(...model[4], ...baseColor); // 12 - south west
+        vertices.push(...model[1], ...baseColor); // 14 - north west
+        vertices.push(...model[3], ...baseColor); // 13 - south east
 
-        vertices.push(...model[3], ...Color.Gray); // 15 - south east
-        vertices.push(...model[1], ...Color.Gray); // 17 - north west
-        vertices.push(...model[2], ...Color.Gray); // 16 - north east
+        vertices.push(...model[3], ...baseColor); // 15 - south east
+        vertices.push(...model[1], ...baseColor); // 17 - north west
+        vertices.push(...model[2], ...baseColor); // 16 - north east
 
         return new Float32Array(vertices);
     }
@@ -248,5 +233,15 @@ export default class Util {
     static unitVector(v) {
         const length = Math.hypot(v[X], v[Y], v[Z]);
         return length === 0 ? [0, 0, 0] : [v[X] / length, v[Y] / length, v[Z] / length];
+    }
+    static #colorConverter = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
+    static toRGBA(color) {
+        Util.#colorConverter.fillStyle = color;
+        Util.#colorConverter.fillRect(0, 0, 1, 1);
+        return Util.#colorConverter.getImageData(0, 0, 1, 1).data; // returns [r, g, b, a]
+    }
+    static toRGB(color) {
+        const rgba = Util.toRGBA(color);
+        return [rgba[0] / 255, rgba[1] / 255, rgba[2] / 255];
     }
 }

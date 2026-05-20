@@ -6,6 +6,7 @@ import { vertex, fragment } from './shaders.js';
 import { mat4, vec3, quat } from 'https://cdn.skypack.dev/gl-matrix';
 import Shape from './shape.js';
 import { Camera } from './camera.js';
+import { TriPyramid } from './tripyramid.js';
 
 const shader = Util.createShader(view, vertex, fragment);
 view.useProgram(shader);
@@ -33,6 +34,8 @@ const vbPyramid = Util.createBuffer(view, vPyramid, view.ARRAY_BUFFER);
 const ibPyramid = Util.createBuffer(view, iPyramid, view.ELEMENT_ARRAY_BUFFER);
 const vaoPyramid = Util.getVao(view, vbPyramid, ibPyramid, vertexPosition, vertexColor);
 const pyramid = new Shape([0, 5, -10], 1, [0, 1, 0], 1, vaoPyramid, iPyramid.length);
+
+const triPyramid = new TriPyramid(shader, [-5, 5, -10], 1, 0, [0, 1, 0]);
 
 
 const camera = new Camera();
@@ -62,6 +65,8 @@ function animate(ts) {
 
     pyramid.update();
     pyramid.draw(matWorld);
+
+    triPyramid.draw(matWorld);
 
     requestAnimationFrame(animate);
 }

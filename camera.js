@@ -1,7 +1,7 @@
 export class Camera {
-        #direction;
-        #look;
-        #boundUpdate;
+    #direction;
+    #look;
+    #boundUpdate;
     constructor(fov = 90, near = 0.1, far = 1000) {
         this.fov = fov * Math.PI / 180;
         this.near = near;
@@ -23,9 +23,11 @@ export class Camera {
             if (document.pointerLockElement === this.canvas) this.canvas.addEventListener("mousemove", this.#boundUpdate);
             else this.canvas.removeEventListener("mousemove", this.#boundUpdate);
         });
-        this.canvas.addEventListener("click", () => {
-            if (document.pointerLockElement === this.canvas) document.exitPointerLock();
-            else this.canvas.requestPointerLock();
+        this.canvas.addEventListener("dblclick", (e) => {
+            if (e.button === 0) {
+                if (document.pointerLockElement === this.canvas) document.exitPointerLock();
+                else this.canvas.requestPointerLock();
+            }
         });
     }
     turn(delta) { this.azimuth += delta; this.updateDirection(); }
@@ -43,12 +45,12 @@ export class Camera {
         this.#direction[2] = -Math.cos(this.azimuth) * cosEl;
         this.updateLook();
     }
-    updateLook() {
+    updateLook() { // the direction of the camera by adding the direction vector to the position
         this.#look[0] = this.position[0] + this.#direction[0];
         this.#look[1] = this.position[1] + this.#direction[1];
         this.#look[2] = this.position[2] + this.#direction[2];
     }
-    updateOrientation(e) {
+    updateOrientation(e) { // update azimuth and elevation based on mouse movement
         const turnSpeed = 0.001;
         this.azimuth += e.movementX * turnSpeed;
         this.elevation -= e.movementY * turnSpeed;
@@ -75,18 +77,19 @@ export class Camera {
         this.position[0] += this.direction[0] * distance;
         this.position[1] += this.direction[1] * distance;
         this.position[2] += this.direction[2] * distance;
+        if (this.position[1] < 0.2) this.position[1] = 0.2;
         this.updateLook();
     }
     backward(distance) { this.forward(-distance); }
     strafeLeft(distance) {
-        const right = [
-            Math.cos(this.azimuth),
-            0,
-            Math.sin(this.azimuth)
-        ];
-        this.position[0] -= right[0] * distance;
-        this.position[1] -= right[1] * distance;
-        this.position[2] -= right[2] * distance;
+        // const right = [
+        //     Math.cos(this.azimuth),
+        //     0,
+        //     Math.sin(this.azimuth)
+        // ];
+        this.position[0] -= Math.cos(this.azimuth) * distance;
+        //this.position[1] -= right[1] * distance;
+        this.position[2] -= Math.sin(this.azimuth) * distance;
         this.updateLook();
     }
     strafeRight(distance) { this.strafeLeft(-distance); }
