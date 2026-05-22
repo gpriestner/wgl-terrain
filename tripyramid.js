@@ -1,37 +1,40 @@
 import { canvas, view } from './canvas.js';
 import { mat4, vec3, glMatrix, quat } from 'https://cdn.skypack.dev/gl-matrix';
 import Util from './util.js';
+import Process from './process.js';
 
 export class TriPyramid {
     model = [
         [0, 1, 0], // 0 - top
-        [0, 0, 1], // 1 - north
-        [Math.PI * 2 / 3, 0, -0.5], // 2 - south east
-        [-Math.PI * 2 / 3, 0, -0.5], // 3 - south west
+        [0, -1, -1], // 1 - north
+        [0.86602540378, -1, 0.5], // 2 - south east
+        [-0.86602540378, -1, 0.5], // 3 - south west
     ];
-    indices = [
-        0, 2, 1, // 0 - right face
-        0, 3, 2, // 1 - near face
-        0, 1, 3, // 2 - left face
-        1, 2, 3, // 3 - base
-    ];
+    indices = [];//
+    //     0, 1, 2, // 0 - right face
+    //     3, 4, 5, // 1 - near face
+    //     6, 7, 8, // 2 - left face
+    //     9, 10, 11, // 3 - base
+    // ];
     colors = [
-        "red", // right face
-        "green", // near face
+        "purple", // right face
+        "Chocolate", // near face
         "blue", // left face
         "yellow", // base
     ];
-    constructor(shader, position, scale = 1, rotationAngle = 0, rotationAxis = [0, 1, 0]) {
-        this.shader = shader;
+    constructor(position, vertexPosition, vertexColor, scale = 1, rotationAngle = 0, rotationAxis = [0, 1, 0]) {
         this.position = position;
         this.scale = scale;
         this.rotationAngle = rotationAngle;
         this.rotationAxis = rotationAxis;
-        this.vertexPosition = view.getAttribLocation(shader, 'vertexPosition');
-        this.vertexColor = view.getAttribLocation(shader, 'vertexColor');
+        this.vertexPosition = vertexPosition; // view.getAttribLocation(shader, 'vertexPosition');
+        this.vertexColor = vertexColor; // view.getAttribLocation(shader, 'vertexColor');
 
-        this.vBuffer = this.createBuffer(this.getVertices(), view.ARRAY_BUFFER);
-        this.iBuffer = this.createBuffer(this.getIndices(), view.ELEMENT_ARRAY_BUFFER);
+        const vertices = this.getVertices();
+        this.vBuffer = this.createBuffer(vertices, view.ARRAY_BUFFER);
+        const indices = this.getIndices();
+        this.indexCount = indices.length; // number of indices
+        this.iBuffer = this.createBuffer(indices, view.ELEMENT_ARRAY_BUFFER);
 
         this.vao = this.getVao(this.vBuffer, this.iBuffer, this.vertexPosition, this.vertexColor);
 
@@ -42,31 +45,44 @@ export class TriPyramid {
     }
     getVertices() {
         const vertices = [];
+
         // right face - red
-        vertices.push(...this.model[0], ...Util.toRGB(this.colors[0])); // 0 - top
-        vertices.push(...this.model[2], ...Util.toRGB(this.colors[0])); // 2 - south east
-        vertices.push(...this.model[1], ...Util.toRGB(this.colors[0])); // 1 - north
+        const colorRight = Util.toRGB("lime");
+        vertices.push(...this.model[0], ...colorRight); // 0 - top
+        vertices.push(...this.model[2], ...colorRight); // 1 - south east
+        vertices.push(...this.model[1], ...colorRight); // 2 - north
+        this.indices.push(0, 1, 2);
+
         // near face - green
-        vertices.push(...this.model[0], ...Util.toRGB(this.colors[1])); // 0 - top
-        vertices.push(...this.model[3], ...Util.toRGB(this.colors[1])); // 3 - south west
-        vertices.push(...this.model[2], ...Util.toRGB(this.colors[1])); // 2 - south east
+        const colorNear = Util.toRGB(this.colors[1]);
+        vertices.push(...this.model[0], ...colorNear); // 3 - top
+        vertices.push(...this.model[3], ...colorNear); // 4 - south west
+        vertices.push(...this.model[2], ...colorNear); // 5 - south east
+        this.indices.push(3, 4, 5);
+
         // left face - blue
-        vertices.push(...this.model[0], ...Util.toRGB(this.colors[2])); // 0 - top
-        vertices.push(...this.model[1], ...Util.toRGB(this.colors[2])); // 1 - north
-        vertices.push(...this.model[3], ...Util.toRGB(this.colors[2])); // 3 - south west
+        const colorLeft = Util.toRGB(this.colors[2]);
+        vertices.push(...this.model[0], ...colorLeft); // 6 - top
+        vertices.push(...this.model[1], ...colorLeft); // 7 - north
+        vertices.push(...this.model[3], ...colorLeft); // 8 - south west
+        this.indices.push(6, 7, 8);
+
         // base - yellow
-        vertices.push(...this.model[1], ...Util.toRGB(this.colors[3])); // 1 - north
-        vertices.push(...this.model[2], ...Util.toRGB(this.colors[3])); // 2 - south east
-        vertices.push(...this.model[3], ...Util.toRGB(this.colors[3])); // 3 - south west
+        const colorBase = Util.toRGB(this.colors[3]);
+        vertices.push(...this.model[1], ...colorBase); // 9 - north
+        vertices.push(...this.model[2], ...colorBase); // 10 - south east
+        vertices.push(...this.model[3], ...colorBase); // 11 - south west
+        this.indices.push(9, 10, 11);
 
         return new Float32Array(vertices);
     }
     getIndices() {
-        return new Uint16Array(this.indices);
+        return new Uint32Array(this.indices);
     }
     createBuffer(data, type) {
         console.assert(type === view.ARRAY_BUFFER || type === view.ELEMENT_ARRAY_BUFFER, "Invalid buffer type");
         const buffer = view.createBuffer();
+        console.assert(buffer, "Failed to create buffer");
         view.bindBuffer(type, buffer);
         view.bufferData(type, data, view.STATIC_DRAW);
         view.bindBuffer(type, null);
@@ -90,6 +106,9 @@ export class TriPyramid {
 
         return vao;
     }
+    update() {
+        this.rotationAngle += this.rotationSpeed * Process.DT;
+    }
     draw(matWorldUniform) {
         quat.setAxisAngle(this.rotation, this.rotationAxis, this.rotationAngle);
         vec3.set(this.scaleVec, this.scale, this.scale, this.scale);
@@ -102,7 +121,7 @@ export class TriPyramid {
 
         view.uniformMatrix4fv(matWorldUniform, false, this.matWorld);
         view.bindVertexArray(this.vao);
-        view.drawElements(view.TRIANGLES, this.numIndices, view.UNSIGNED_INT, 0);
+        view.drawElements(view.TRIANGLES, this.indexCount, view.UNSIGNED_INT, 0);
         view.bindVertexArray(null);
     }
 }

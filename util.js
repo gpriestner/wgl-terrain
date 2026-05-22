@@ -34,7 +34,7 @@ export default class Util {
         // const tp2 = new Terrain(5, -5, -5, 5);
         // terrain.push(tp1);
         // terrain.push(tp2);
-        const terrainCount = 5;
+        const terrainCount = 0;
         const limit = size * 0.9 / 2;
         for (let i = 0; i < terrainCount; i++) {
             const x = Util.random(-limit, limit);
