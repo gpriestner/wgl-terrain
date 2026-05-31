@@ -190,6 +190,20 @@ export default class Util {
         const z = v[X] * sinAngle + v[Z] * cosAngle;
         return [x, v[Y], z];
     }
+    static rotateX(v, a) {
+        const cosAngle = Math.cos(a);
+        const sinAngle = Math.sin(a);
+        const y = v[Y] * cosAngle - v[Z] * sinAngle;
+        const z = v[Y] * sinAngle + v[Z] * cosAngle;
+        return [v[X], y, z];
+    }
+    static rotateZ(v, a) {
+        const cosAngle = Math.cos(a);
+        const sinAngle = Math.sin(a);
+        const x = v[X] * cosAngle - v[Y] * sinAngle;
+        const y = v[X] * sinAngle + v[Y] * cosAngle;
+        return [x, y, v[Z]];
+    }
     static rotate(point, axis, angle) {
         const cos = Math.cos(angle);
         const sin = Math.sin(angle);
@@ -237,11 +251,22 @@ export default class Util {
     static #colorConverter = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
     static toRGBA(color) {
         Util.#colorConverter.fillStyle = color;
-        Util.#colorConverter.fillRect(0, 0, 1, 1);
-        return Util.#colorConverter.getImageData(0, 0, 1, 1).data; // returns [r, g, b, a]
+        const c = Util.#colorConverter.fillStyle; // normalize color string (e.g. "red" -> "#ff0000")
+        const r = parseInt(c.slice(1, 3), 16);
+        const g = parseInt(c.slice(3, 5), 16);
+        const b = parseInt(c.slice(5, 7), 16);
+        //Util.#colorConverter.fillRect(0, 0, 1, 1);
+        //return Util.#colorConverter.getImageData(0, 0, 1, 1).data; // returns [r, g, b, a]
+        return [r, g, b, 255];
     }
     static toRGB(color) {
         const rgba = Util.toRGBA(color);
         return [rgba[0] / 255, rgba[1] / 255, rgba[2] / 255];
+    }
+    static randomColor() {
+        const r = Math.floor(Math.random() * 256);
+        const g = Math.floor(Math.random() * 256);
+        const b = Math.floor(Math.random() * 256);
+        return `rgb(${r}, ${g}, ${b})`;
     }
 }

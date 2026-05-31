@@ -8,6 +8,9 @@ import Shape from './shape.js';
 import { Camera } from './camera.js';
 import { TriPyramid } from './tripyramid.js';
 import { Pyramid } from './pyramid.js';
+import Cube from './cube.js';
+import Scene from './scene.js';
+import Sphere from './sphere.js';
 
 const shader = Util.createShader(view, vertex, fragment);
 view.useProgram(shader);
@@ -19,6 +22,8 @@ const matView = mat4.create();
 const matProj = mat4.create();
 const matViewPr = mat4.create();
 
+const scene = new Scene();
+
 const size = 50; // plane size                                     
 const divisions = 50; // number of subdivisions (higher = more vertices)
 const vPlane = Util.getPlaneVertices(size, divisions);
@@ -27,6 +32,7 @@ const vbPlane = Util.createBuffer(view, vPlane, view.ARRAY_BUFFER);
 const ibPlane = Util.createBuffer(view, iPlane, view.ELEMENT_ARRAY_BUFFER);
 const vaoPlane = Util.getVao(view, vbPlane, ibPlane, vertexPosition, vertexColor);
 const plain = new Shape(vec3.fromValues(0, 0, 0), 1, [0, 1, 0], 0, vaoPlane, iPlane.length);
+scene.add(plain);
 
 
 const vPyramid = Util.getPyramidVertices();
@@ -35,11 +41,20 @@ const vbPyramid = Util.createBuffer(view, vPyramid, view.ARRAY_BUFFER);
 const ibPyramid = Util.createBuffer(view, iPyramid, view.ELEMENT_ARRAY_BUFFER);
 const vaoPyramid = Util.getVao(view, vbPyramid, ibPyramid, vertexPosition, vertexColor);
 const pyramid = new Shape([0, 5, -10], 1, [0, 1, 0], 1, vaoPyramid, iPyramid.length);
+scene.add(pyramid);
 
 const triPyramid = new TriPyramid([-5, 5, -10], vertexPosition, vertexColor, 1, 0, [0, 1, 0]);
+scene.add(triPyramid);
 
 const pyramid2 = new Pyramid(vertexPosition, vertexColor, [5, 5, -10], 1, 0, [0, 1, 0]);
+scene.add(pyramid2);
 
+const cube = new Cube(vertexPosition, vertexColor, [0, 5, -5], 1, 0, [0, 1, 0]);
+scene.add(cube);
+
+const sphere = new Sphere(vertexPosition, vertexColor, [0, 8, -5], 1, 0, [0, 1, 0]);
+sphere.rotationSpeed = 0.5;
+scene.add(sphere);
 
 const camera = new Camera();
 
@@ -64,16 +79,22 @@ function animate(ts) {
 
     view.uniformMatrix4fv(matViewProj, false, matViewPr);
 
-    plain.draw(matWorld);
+    // plain.draw(matWorld);
 
-    pyramid.update();
-    pyramid.draw(matWorld);
+    // pyramid.update();
+    // pyramid.draw(matWorld);
 
-    pyramid2.update();
-    pyramid2.draw(matWorld);
+    // pyramid2.update();
+    // pyramid2.draw(matWorld);
 
-    triPyramid.update();
-    triPyramid.draw(matWorld);
+    // triPyramid.update();
+    // triPyramid.draw(matWorld);
+
+    // cube.update();
+    // cube.draw(matWorld);
+
+    scene.update();
+    scene.draw(matWorld);
 
     requestAnimationFrame(animate);
 }

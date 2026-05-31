@@ -23,8 +23,8 @@ export class Camera {
             if (document.pointerLockElement === this.canvas) this.canvas.addEventListener("mousemove", this.#boundUpdate);
             else this.canvas.removeEventListener("mousemove", this.#boundUpdate);
         });
-        this.canvas.addEventListener("dblclick", (e) => {
-            if (e.button === 0) {
+        this.canvas.addEventListener("mousedown", (e) => {
+            if (e.button === 1) {
                 if (document.pointerLockElement === this.canvas) document.exitPointerLock();
                 else this.canvas.requestPointerLock();
             }

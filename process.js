@@ -1,4 +1,5 @@
 import Go from "./go.js";
+import { canvas } from './canvas.js';
 
 export default class Process {
     static DT = 0;
@@ -51,5 +52,10 @@ export default class Process {
         if (Go.TiltDown) camera.tilt(-turnSpeed);
         if (Go.Higher) camera.elevate(moveSpeed);
         if (Go.Lower) camera.elevate(-moveSpeed);
+
+        if (Go.Pointer) {
+            if (document.pointerLockElement === canvas) document.exitPointerLock();
+            else canvas.requestPointerLock();
+       }
     }
 }

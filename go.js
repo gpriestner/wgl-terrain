@@ -16,4 +16,5 @@ export default class Go {
     static get Lower() { return Key.Down("PageDown") || Key.Down("KeyC") || Mouse.WheelDown; }
 
     static get Reset() { return Key.Once("KeyR"); }
+    static get Pointer() { return Key.Once("Space"); }
 }
