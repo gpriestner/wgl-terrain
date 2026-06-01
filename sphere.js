@@ -11,7 +11,7 @@ export default class Sphere extends BaseShape {
         this.layers = layers;
         this.slices = slices;
         this.createModel();
-        this.init(vertexPosition, vertexColor, position, scale, rotationAngle, rotationAxis);
+        this.init(vertexPosition, vertexColor, position, scale, rotationAngle, Util.unitVector(rotationAxis));
     }
     createModel() {
         const zAngle = Math.PI / (this.layers + 1); // angle between each layer (including poles)
@@ -29,12 +29,16 @@ export default class Sphere extends BaseShape {
 
         for (const [i, m] of this.model.entries()) m.index = i;
 
+        // rotate all points around the z-axis
+        // for (let i = 0; i < this.model.length; ++i) this.model[i] = Util.rotateZ(this.model[i], Math.PI / 2);
+
         // populate faces directly around east pole
         let firstRing = this.rings[0];
         for (let i = 1; i <= firstRing.length; ++i) {
             const p1 = firstRing[i - 1];
             const p2 = firstRing[i % firstRing.length];
-            const face = new Face([east.index, p1.index, p2.index], Util.randomColor());
+            const color = i % 2 ? "white" : "red";
+            const face = new Face([east.index, p1.index, p2.index], color);
             this.faces.push(face);
         }
         // populate faces directly around west pole
@@ -42,7 +46,8 @@ export default class Sphere extends BaseShape {
         for (let i = 1; i <= lastRing.length; ++i) {
             const p1 = lastRing[i - 1];
             const p2 = lastRing[i % lastRing.length];
-            const face = new Face([west.index, p2.index, p1.index], Util.randomColor());
+            const color = i % 2 ? "white" : "red";
+            const face = new Face([west.index, p2.index, p1.index], color);
             this.faces.push(face);
         }
 
@@ -56,7 +61,7 @@ export default class Sphere extends BaseShape {
                     const p2 = ring1[j % ring1.length];
                     const p3 = ring2[j - 1];
                     const p4 = ring2[j % ring2.length];
-                    const color = Util.randomColor();
+                    const color = (i + j) % 2 ? "red" : "white";
                     this.faces.push(new Face([p1.index, p3.index, p2.index], color));
                     this.faces.push(new Face([p2.index, p3.index, p4.index], color));
                 }
