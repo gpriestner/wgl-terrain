@@ -1,6 +1,7 @@
 import Key from "./key.js";
 import Mouse from './mouse.js';
 
+
 export default class Go {
     static get Forward() { return Key.Down("KeyW") || Mouse.Forward; }
     static get Backward() { return Key.Down("KeyS") || Mouse.Backward; }

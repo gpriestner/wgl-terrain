@@ -11,6 +11,7 @@ import { Pyramid } from './pyramid.js';
 import Cube from './cube.js';
 import Scene from './scene.js';
 import Sphere from './sphere.js';
+import Torus from './torus.js';
 
 const shader = Util.createShader(view, vertex, fragment);
 view.useProgram(shader);
@@ -55,6 +56,10 @@ scene.add(cube);
 const sphere = new Sphere(vertexPosition, vertexColor, [0, 8, -5], 1, 0, [0, 1, 0]);
 sphere.rotationSpeed = 0.5;
 scene.add(sphere);
+
+const torus = new Torus(vertexPosition, vertexColor, [8, 8, -5], 1, 0, [1, 0, 0]);
+torus.rotationSpeed = 0.5;
+scene.add(torus);
 
 const camera = new Camera();
 

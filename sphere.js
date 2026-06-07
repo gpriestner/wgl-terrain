@@ -11,6 +11,7 @@ export default class Sphere extends BaseShape {
         this.layers = layers;
         this.slices = slices;
         this.createModel();
+        this.createFaces();
         this.init(vertexPosition, vertexColor, position, scale, rotationAngle, Util.unitVector(rotationAxis));
     }
     createModel() {
@@ -21,7 +22,7 @@ export default class Sphere extends BaseShape {
         this.model.push(east); // east
         for (let i = 1; i <= this.layers; ++i) {
             const newPoint = Util.rotateZ(east, i * zAngle);
-            const newRing = this.generateRing(newPoint, this.slices);
+            const newRing = this.generateRing(newPoint);
             this.rings.push(newRing);
             this.model.push(...newRing);
         }
@@ -32,27 +33,29 @@ export default class Sphere extends BaseShape {
         // rotate all points around the z-axis
         // for (let i = 0; i < this.model.length; ++i) this.model[i] = Util.rotateZ(this.model[i], Math.PI / 2);
 
-        // populate faces directly around east pole
+    }
+    createFaces() {
+        // populate faces directly around east pole (1 triangle per face)
         let firstRing = this.rings[0];
         for (let i = 1; i <= firstRing.length; ++i) {
             const p1 = firstRing[i - 1];
             const p2 = firstRing[i % firstRing.length];
             const color = i % 2 ? "white" : "red";
-            const face = new Face([east.index, p1.index, p2.index], color);
+            const face = new Face([this.model[0].index, p1.index, p2.index], color);
             this.faces.push(face);
         }
-        // populate faces directly around west pole
+        // populate faces directly around west pole (1 triangle per face)
         let lastRing = this.rings.at(-1);
         for (let i = 1; i <= lastRing.length; ++i) {
             const p1 = lastRing[i - 1];
             const p2 = lastRing[i % lastRing.length];
             const color = i % 2 ? "white" : "red";
-            const face = new Face([west.index, p2.index, p1.index], color);
+            const face = new Face([this.model.at(-1).index, p2.index, p1.index], color);
             this.faces.push(face);
         }
 
         if (this.layers > 1) {
-            // populate faces between rings
+            // populate faces between rings (2 triangles per face)
             for (let i = 0; i < this.rings.length - 1; ++i) {
                 const ring1 = this.rings[i];
                 const ring2 = this.rings[i + 1];
@@ -68,38 +71,14 @@ export default class Sphere extends BaseShape {
             }
         }
     }
-    generateRing(point, count) {
+    generateRing(point) {
         const ring = [];
-        const angle = 2 * Math.PI / count;
+        const angle = 2 * Math.PI / this.slices;
         ring.push(point);
-        for (let i = 1; i < count; ++i) {
+        for (let i = 1; i < this.slices; ++i) {
             const newPoint = Util.rotateX(point, i * angle);
             ring.push(newPoint);
         }
         return ring;
-    }
-    createModel2(latBands, longBands) {
-        for (let lat = 0; lat <= latBands; lat++) {
-            const theta = lat * Math.PI / latBands;
-            const sinTheta = Math.sin(theta);
-            const cosTheta = Math.cos(theta);
-            for (let long = 0; long <= longBands; long++) {
-                const phi = long * 2 * Math.PI / longBands;
-                const sinPhi = Math.sin(phi);
-                const cosPhi = Math.cos(phi);
-                const x = cosPhi * sinTheta * this.scale;
-                const y = cosTheta * this.scale;
-                const z = sinPhi * sinTheta * this.scale;
-                this.model.push([x, y, z]);
-            }
-        }
-        for (let lat = 0; lat < latBands; lat++) {
-            for (let long = 0; long < longBands; long++) {
-                const first = (lat * (longBands + 1)) + long;
-                const second = first + longBands + 1;
-                this.faces.push(new Face([first, second, first + 1], "red"));
-                this.faces.push(new Face([second, second + 1, first + 1], "white"));
-            }
-        }
     }
 }
